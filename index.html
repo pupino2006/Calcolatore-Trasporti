@@ -9,11 +9,12 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Caricamento Logo Originale dal Sito */
+        /* Modifica per Logo Locale su GitHub */
         .header { text-align: center; margin-bottom: 20px; }
         .header img { 
-            max-width: 220px; 
+            max-width: 100%; 
             height: auto; 
+            max-height: 120px; /* Limita l'altezza per non occupare troppo spazio */
             display: block; 
             margin: 0 auto;
         }
@@ -51,7 +52,7 @@
     </div>
 
     <div class="header">
-        <img src="https://pannellitermici.it/img/logo-pannelli-termici-1616429532.jpg" alt="Logo Pannelli Termici">
+        <img src="PT marchio payoff 1 riga RGB HR.png" alt="Logo Pannelli Termici">
     </div>
 
     <div id="stepHome" class="step active">
@@ -59,7 +60,6 @@
         <div class="card" onclick="setRuolo('commerciale')"><h3>ACCESSO COMMERCIALE</h3></div>
         <div class="card admin-card" onclick="mostraLogin()"><h3>ACCESSO AMMINISTRATORE</h3></div>
     </div>
-
     <div id="stepLogin" class="step">
         <h1>Login Amministratore</h1>
         <input type="password" id="passAdmin" placeholder="Inserisci Password">
@@ -432,4 +432,5 @@ function indietro() {
 </script>
 </body>
 </html>
+
 
