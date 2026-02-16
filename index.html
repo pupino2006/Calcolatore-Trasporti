@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pannelli Termici - Calcolo Trasporti</title>
+    <title>Pannelli Termici - Trasporti</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#005aab">
+    <link rel="apple-touch-icon" href="logo-icon.png">
+
     <style>
         :root { 
             --blue: #005aab; 
@@ -13,7 +17,7 @@
             --admin: #2c3e50; 
         }
         
-        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; -webkit-tap-highlight-color: transparent; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         .header { text-align: center; margin-bottom: 20px; }
@@ -49,7 +53,7 @@
         .tag { display: inline-block; background: var(--blue); color: white; padding: 5px 10px; border-radius: 5px; margin: 5px 5px 0 0; font-size: 13px; }
         
         .result { background: #eef9ff; padding: 20px; border-radius: 10px; border-left: 5px solid var(--blue); margin-top: 20px; line-height: 1.5; }
-        .price-box { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding: 8px; background: white; border-radius: 5px; border: 1px solid #ddd; }
+        .price-box { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #ddd; }
 
         @media print {
             .nav-bar, .btn-main, .btn-small, .btn-print, .search-box { display: none !important; }
@@ -66,7 +70,7 @@
     </div>
 
     <div class="header">
-        <img src="logo.png" alt="Logo">
+        <img src="logo-icon.png" alt="Logo">
     </div>
 
     <div id="stepHome" class="step active">
@@ -269,28 +273,38 @@ function calcola() {
     let risultatiHTML = `<h3>Preventivo per ${p.n} (${p.pv})</h3>`;
     risultatiHTML += `<p>Distanza stimata: <b>${dist} km</b></p><hr>`;
 
-    let opzioni = [];
+    let costi = [];
 
-    // --- LOGICA PREZZI FISSI / KM ---
-    // Ricordando che p.b = Bosica e p.t = Tauro (corretti per Milano 750/840)
-    
+    // Calcolo costi (b = Bosica, t = Tauro)
     if (p.b > 0) {
-        let prezzoB = (state.tipo === 'parziale') ? (dist * 1.50 * coeff) : p.b;
-        opzioni.push({ nome: "BOSICA", prezzo: prezzoB });
+        let val = (state.tipo === 'parziale') ? (dist * 1.50 * coeff) : p.b;
+        costi.push({ nome: "BOSICA", prezzo: val });
     }
-
     if (p.t > 0) {
-        let prezzoT = (state.tipo === 'parziale') ? (dist * 1.60 * coeff) : p.t;
-        opzioni.push({ nome: "TAURO", prezzo: prezzoT });
+        let val = (state.tipo === 'parziale') ? (dist * 1.60 * coeff) : p.t;
+        costi.push({ nome: "TAURO", prezzo: val });
     }
 
-    opzioni.forEach(opt => {
+    // LOGICA DIFFERENZIATA RUOLO
+    if (state.ruolo === 'commerciale') {
+        // Prendi solo il più alto
+        const maxCosto = Math.max(...costi.map(c => c.prezzo));
         risultatiHTML += `
             <div class="price-box">
-                <span><strong>${opt.nome}</strong></span>
-                <span style="color:var(--blue); font-weight:bold;">€ ${opt.prezzo.toFixed(2)}</span>
-            </div>`;
-    });
+                <span><strong>QUOTA TRASPORTO</strong></span>
+                <span style="color:var(--blue); font-weight:bold;">€ ${maxCosto.toFixed(2)}</span>
+            </div>
+            <p style="font-size:11px; color:gray; margin-top:10px;">* Prezzo finito per il cliente finale.</p>`;
+    } else {
+        // Amministratore vede tutto
+        costi.forEach(c => {
+            risultatiHTML += `
+                <div class="price-box">
+                    <span><strong>${c.nome}</strong></span>
+                    <span style="color:var(--admin); font-weight:bold;">€ ${c.prezzo.toFixed(2)}</span>
+                </div>`;
+        });
+    }
 
     document.getElementById('dettaglio').innerHTML = risultatiHTML;
     mostra('stepResult');
@@ -314,6 +328,14 @@ function indietro() {
     let current = steps.findIndex(s => document.getElementById(s).classList.contains('active'));
     if(current > 0) mostra(steps[current-1]);
 }
+
+// Service Worker per PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
+
