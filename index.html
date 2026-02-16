@@ -213,7 +213,7 @@ const db = [
     {n: "Lecce", pv: "LE", b: 900, t: 1045, lat: 40.351, lon: 18.174}
 ];
 
-const SEDE = { lat: 42.67, lon: 14.01 }; 
+const SEDE = { lat: 42.6710, lon: 14.0150 }; // Via Argentina 2, Roseto
 let state = { ruolo: '', tipo: '', metri: 0, scarico: '', province: [] };
 
 function setRuolo(r) { state.ruolo = r; mostra('step1'); }
@@ -263,19 +263,51 @@ function getCoeff(m) {
     return map[m] || 1;
 }
 
-function calcola() {
+// NUOVA FUNZIONE OSRM PER KM REALI
+async function getRoadDistance(lat2, lon2) {
+    try {
+        const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${SEDE.lon},${SEDE.lat};${lon2},${lat2}?overview=false`);
+        const data = await response.json();
+        if (data.routes && data.routes.length > 0) {
+            // Ritorna km (distanza è in metri) + 5% di scarto tecnico
+            return (data.routes[0].distance / 1000) * 1.05;
+        }
+        return null;
+    } catch (e) {
+        console.error("Errore OSRM", e);
+        return null;
+    }
+}
+
+async function calcola() {
     if (state.province.length === 0) return alert("Seleziona almeno una provincia");
 
+    // Mostriamo un caricamento rapido
+    document.getElementById('dettaglio').innerHTML = "Calcolo percorso stradale in corso...";
+    mostra('stepResult');
+
     const p = state.province[0];
-    const dist = calcolaDist(SEDE.lat, SEDE.lon, p.lat, p.lon).toFixed(0);
+    let dist = await getRoadDistance(p.lat, p.lon);
+    
+    // Se OSRM fallisce, usiamo una stima brutale (linea d'aria * 1.3)
+    if (!dist) {
+        const lineaAria = calcolaDistVolo(SEDE.lat, SEDE.lon, p.lat, p.lon);
+        dist = lineaAria * 1.3;
+    }
+
+    const distArrotondata = dist.toFixed(0);
     const coeff = (state.tipo === 'parziale') ? getCoeff(state.metri) : 1;
     
     let risultatiHTML = `<h3>Preventivo per ${p.n} (${p.pv})</h3>`;
-    risultatiHTML += `<p>Distanza stimata: <b>${dist} km</b></p><hr>`;
+    
+    // RIMUOVI SCRITTA KM SE SCARICO SINGOLO
+    if (state.scarico !== 'singolo') {
+        risultatiHTML += `<p>Distanza stradale stimata: <b>${distArrotondata} km</b></p><hr>`;
+    } else {
+        risultatiHTML += `<hr>`;
+    }
 
     let costi = [];
-
-    // Calcolo costi (b = Bosica, t = Tauro)
     if (p.b > 0) {
         let val = (state.tipo === 'parziale') ? (dist * 1.50 * coeff) : p.b;
         costi.push({ nome: "BOSICA", prezzo: val });
@@ -285,9 +317,8 @@ function calcola() {
         costi.push({ nome: "TAURO", prezzo: val });
     }
 
-    // LOGICA DIFFERENZIATA RUOLO
     if (state.ruolo === 'commerciale') {
-        // Prendi solo il più alto
+        // Mostra solo il prezzo più alto
         const maxCosto = Math.max(...costi.map(c => c.prezzo));
         risultatiHTML += `
             <div class="price-box">
@@ -296,7 +327,7 @@ function calcola() {
             </div>
             <p style="font-size:11px; color:gray; margin-top:10px;">* Prezzo finito per il cliente finale.</p>`;
     } else {
-        // Amministratore vede tutto
+        // Amministratore vede tutto (BOSICA e TAURO)
         costi.forEach(c => {
             risultatiHTML += `
                 <div class="price-box">
@@ -307,10 +338,10 @@ function calcola() {
     }
 
     document.getElementById('dettaglio').innerHTML = risultatiHTML;
-    mostra('stepResult');
 }
 
-function calcolaDist(lat1, lon1, lat2, lon2) {
+// Vecchia formula tenuta come fallback di emergenza
+function calcolaDistVolo(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2-lat1) * Math.PI / 180;
     const dLon = (lon2-lon1) * Math.PI / 180;
@@ -328,14 +359,4 @@ function indietro() {
     let current = steps.findIndex(s => document.getElementById(s).classList.contains('active'));
     if(current > 0) mostra(steps[current-1]);
 }
-
-// Service Worker per PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
-  });
-}
 </script>
-</body>
-</html>
-
