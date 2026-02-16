@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pannelli Termici - Calcolo Trasporti</title>
     <style>
-        :root { --blue: #005aab; --orange: #ff8c00; --gray: #f4f7f6; --admin: #2c3e50; }
+        :root { 
+            --blue: #005aab; 
+            --light-blue: #e3f2fd; /* Azzurrino chiaro per i tasti */
+            --hover-blue: #bbdefb; /* Azzurrino leggermente più scuro per l'effetto click */
+            --orange: #ff8c00; 
+            --gray: #f4f7f6; 
+            --admin: #2c3e50; 
+        }
+        
         body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* Modifica per Logo Locale su GitHub */
         .header { text-align: center; margin-bottom: 20px; }
         .header img { 
             max-width: 100%; 
             height: auto; 
-            max-height: 120px; /* Limita l'altezza per non occupare troppo spazio */
+            max-height: 120px; 
             display: block; 
             margin: 0 auto;
         }
@@ -23,16 +30,35 @@
         .step { display: none; }
         .step.active { display: block; }
         .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        
         .btn-small { background: #ddd; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .card { border: 2px solid #eee; padding: 20px; border-radius: 10px; cursor: pointer; text-align: center; margin-bottom: 15px; transition: 0.2s; }
-        .card:active { background: #f0f7ff; transform: scale(0.98); }
-        .card.admin-card { border-color: var(--admin); color: var(--admin); }
+        
+        /* Modifica Card con Azzurrino */
+        .card { 
+            background-color: var(--light-blue); 
+            border: 2px solid #c2e3f7; 
+            padding: 20px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            text-align: center; 
+            margin-bottom: 15px; 
+            transition: all 0.2s ease; 
+            color: var(--blue);
+        }
+        .card:hover { background-color: var(--hover-blue); transform: translateY(-2px); }
+        .card:active { transform: scale(0.98); }
+        
+        /* Card Amministratore differenziata */
+        .card.admin-card { border-color: var(--admin); color: var(--admin); background-color: #f8f9fa; }
+
         .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
         .btn-print { background: #27ae60; margin-top: 10px; }
+        
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
         .suggestions { position: absolute; width: 100%; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .suggestions div { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; }
         .tag { display: inline-block; background: var(--blue); color: white; padding: 5px 10px; border-radius: 5px; margin: 5px 5px 0 0; font-size: 13px; }
+        
         .result { background: #eef9ff; padding: 20px; border-radius: 10px; border-left: 5px solid var(--blue); margin-top: 20px; line-height: 1.5; }
         .admin-result { background: #fffcf0; border-left-color: #f1c40f; margin-bottom: 10px; border: 1px solid #ddd; }
         .price-box { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding: 8px; background: white; border-radius: 5px; }
@@ -52,7 +78,7 @@
     </div>
 
     <div class="header">
-        <img src="logo.png" alt="logo.png">
+        <img src="logo.png" alt="Logo Pannelli Termici">
     </div>
 
     <div id="stepHome" class="step active">
@@ -60,6 +86,7 @@
         <div class="card" onclick="setRuolo('commerciale')"><h3>ACCESSO COMMERCIALE</h3></div>
         <div class="card admin-card" onclick="mostraLogin()"><h3>ACCESSO AMMINISTRATORE</h3></div>
     </div>
+
     <div id="stepLogin" class="step">
         <h1>Login Amministratore</h1>
         <input type="password" id="passAdmin" placeholder="Inserisci Password">
@@ -111,217 +138,112 @@
 </div>
 
 <script>
-
-// Database Province con coordinate approssimative per calcolo reale
-
+// Database Province con coordinate approssimative
 const db = [
-
     {n: "Aosta", pv: "AO", b: 1075, t: 0, lat: 45.734, lon: 7.321},
-
     {n: "Alessandria", pv: "AL", b: 730, t: 915, lat: 44.912, lon: 8.615},
-
     {n: "Novara", pv: "NO", b: 770, t: 860, lat: 45.446, lon: 8.620},
-
     {n: "Asti", pv: "AT", b: 840, t: 920, lat: 44.901, lon: 8.207},
-
     {n: "Vercelli", pv: "VC", b: 800, t: 880, lat: 45.323, lon: 8.415},
-
     {n: "Biella", pv: "BI", b: 850, t: 935, lat: 45.563, lon: 8.057},
-
     {n: "Torino", pv: "TO", b: 925, t: 1005, lat: 45.070, lon: 7.686},
-
     {n: "Cuneo", pv: "CN", b: 980, t: 1060, lat: 44.389, lon: 7.547},
-
     {n: "Mantova", pv: "MN", b: 640, t: 715, lat: 45.156, lon: 10.791},
-
     {n: "Cremona", pv: "CR", b: 665, t: 750, lat: 45.133, lon: 10.022},
-
     {n: "Brescia", pv: "BS", b: 720, t: 790, lat: 45.541, lon: 10.211},
-
     {n: "Pavia", pv: "PV", b: 750, t: 815, lat: 45.184, lon: 9.158},
-
     {n: "Milano", pv: "MI", b: 750, t: 840, lat: 45.464, lon: 9.189},
-
     {n: "Monza-Brianza", pv: "MB", b: 750, t: 840, lat: 45.584, lon: 9.273},
-
     {n: "Bergamo", pv: "BG", b: 750, t: 820, lat: 45.698, lon: 9.677},
-
     {n: "Lecco", pv: "LC", b: 840, t: 975, lat: 45.856, lon: 9.397},
-
     {n: "Como", pv: "CO", b: 840, t: 895, lat: 45.808, lon: 9.085},
-
     {n: "Varese", pv: "VA", b: 885, t: 955, lat: 45.817, lon: 8.826},
-
     {n: "Sondrio", pv: "SO", b: 960, t: 1060, lat: 46.170, lon: 9.871},
-
     {n: "Trento", pv: "TN", b: 850, t: 845, lat: 46.074, lon: 11.121},
-
     {n: "Bolzano", pv: "BZ", b: 960, t: 1060, lat: 46.498, lon: 11.354},
-
     {n: "Pordenone", pv: "PN", b: 790, t: 1025, lat: 45.962, lon: 12.656},
-
     {n: "Udine", pv: "UD", b: 800, t: 1000, lat: 46.071, lon: 13.237},
-
     {n: "Gorizia", pv: "GO", b: 895, t: 1005, lat: 45.940, lon: 13.621},
-
     {n: "Trieste", pv: "TS", b: 895, t: 975, lat: 45.649, lon: 13.776},
-
     {n: "Rovigo", pv: "RO", b: 580, t: 640, lat: 45.070, lon: 11.790},
-
     {n: "Padova", pv: "PD", b: 615, t: 695, lat: 45.406, lon: 11.876},
-
     {n: "Verona", pv: "VR", b: 675, t: 705, lat: 45.438, lon: 10.991},
-
     {n: "Vicenza", pv: "VI", b: 700, t: 790, lat: 45.547, lon: 11.546},
-
     {n: "Venezia", pv: "VE", b: 655, t: 730, lat: 45.440, lon: 12.315},
-
     {n: "Treviso", pv: "TV", b: 685, t: 765, lat: 45.666, lon: 12.245},
-
     {n: "Belluno", pv: "BL", b: 780, t: 865, lat: 46.142, lon: 12.216},
-
     {n: "La Spezia", pv: "SP", b: 800, t: 935, lat: 44.110, lon: 9.844},
-
     {n: "Genova", pv: "GE", b: 900, t: 1005, lat: 44.405, lon: 8.946},
-
     {n: "Savona", pv: "SV", b: 950, t: 1120, lat: 44.307, lon: 8.481},
-
     {n: "Imperia", pv: "IM", b: 1000, t: 1035, lat: 43.886, lon: 8.041},
-
     {n: "Rimini", pv: "RN", b: 460, t: 550, lat: 44.057, lon: 12.568},
-
     {n: "Forli", pv: "FO", b: 480, t: 540, lat: 44.222, lon: 12.040},
-
     {n: "Ravenna", pv: "RA", b: 480, t: 540, lat: 44.418, lon: 12.203},
-
     {n: "Ferrara", pv: "FE", b: 530, t: 595, lat: 44.838, lon: 11.619},
-
     {n: "Bologna", pv: "BO", b: 572, t: 615, lat: 44.494, lon: 11.342},
-
     {n: "Modena", pv: "MO", b: 540, t: 615, lat: 44.647, lon: 10.925},
-
     {n: "Reggio Emilia", pv: "RE", b: 615, t: 680, lat: 44.698, lon: 10.631},
-
     {n: "Parma", pv: "PR", b: 600, t: 695, lat: 44.801, lon: 10.327},
-
     {n: "Piacenza", pv: "PC", b: 685, t: 750, lat: 45.052, lon: 9.693},
-
     {n: "Arezzo", pv: "AR", b: 515, t: 570, lat: 43.463, lon: 11.878},
-
     {n: "Siena", pv: "SI", b: 565, t: 620, lat: 43.318, lon: 11.332},
-
     {n: "Firenze", pv: "FI", b: 610, t: 680, lat: 43.769, lon: 11.255},
-
     {n: "Grosseto", pv: "GR", b: 595, t: 640, lat: 42.763, lon: 11.111},
-
     {n: "Prato", pv: "PO", b: 655, t: 0, lat: 43.877, lon: 11.102},
-
     {n: "Pistoia", pv: "PT", b: 720, t: 835, lat: 43.933, lon: 10.916},
-
     {n: "Lucca", pv: "LU", b: 760, t: 845, lat: 43.842, lon: 10.502},
-
     {n: "Pisa", pv: "PI", b: 720, t: 845, lat: 43.708, lon: 10.403},
-
     {n: "Livorno", pv: "LI", b: 665, t: 750, lat: 43.548, lon: 10.310},
-
     {n: "Massa", pv: "MS", b: 790, t: 0, lat: 44.035, lon: 10.144},
-
     {n: "Pesaro", pv: "PS", b: 460, t: 530, lat: 43.912, lon: 12.913},
-
     {n: "Ancona", pv: "AN", b: 360, t: 440, lat: 43.615, lon: 13.518},
-
     {n: "Macerata", pv: "MC", b: 335, t: 385, lat: 43.300, lon: 13.453},
-
     {n: "Fermo", pv: "FM", b: 300, t: 375, lat: 43.161, lon: 13.718},
-
     {n: "Ascoli Piceno", pv: "AP", b: 285, t: 360, lat: 42.853, lon: 13.576},
-
     {n: "Terni", pv: "TR", b: 450, t: 645, lat: 42.563, lon: 12.641},
-
     {n: "Perugia", pv: "PG", b: 450, t: 495, lat: 43.110, lon: 12.390},
-
     {n: "Rieti", pv: "RI", b: 500, t: 550, lat: 42.404, lon: 12.859},
-
     {n: "Roma", pv: "RM", b: 530, t: 605, lat: 41.890, lon: 12.496},
-
     {n: "Latina", pv: "LT", b: 595, t: 595, lat: 41.467, lon: 12.903},
-
     {n: "Frosinone", pv: "FR", b: 540, t: 585, lat: 41.639, lon: 13.341},
-
     {n: "Viterbo", pv: "VT", b: 0, t: 0, lat: 42.417, lon: 12.101},
-
     {n: "Teramo", pv: "TE", b: 190, t: 260, lat: 42.658, lon: 13.704},
-
     {n: "Pescara", pv: "PE", b: 260, t: 400, lat: 42.461, lon: 14.214},
-
     {n: "Chieti", pv: "CH", b: 310, t: 395, lat: 42.351, lon: 14.167},
-
     {n: "L’Aquila", pv: "AQ", b: 310, t: 385, lat: 42.348, lon: 13.397},
-
     {n: "Isernia", pv: "IS", b: 500, t: 0, lat: 41.591, lon: 14.232},
-
     {n: "Campobasso", pv: "CB", b: 535, t: 640, lat: 41.560, lon: 14.662},
-
     {n: "Benevento", pv: "BN", b: 670, t: 745, lat: 41.130, lon: 14.777},
-
     {n: "Caserta", pv: "CE", b: 655, t: 730, lat: 41.073, lon: 14.331},
-
     {n: "Napoli", pv: "NA", b: 720, t: 855, lat: 40.851, lon: 14.268},
-
     {n: "Avellino", pv: "AV", b: 0, t: 640, lat: 40.914, lon: 14.791},
-
     {n: "Salerno", pv: "SA", b: 850, t: 885, lat: 40.677, lon: 14.765},
-
     {n: "Foggia", pv: "FG", b: 550, t: 630, lat: 41.462, lon: 15.544},
-
     {n: "Bari", pv: "BA", b: 720, t: 690, lat: 41.117, lon: 16.871},
-
     {n: "Taranto", pv: "TA", b: 820, t: 850, lat: 40.464, lon: 17.247},
-
     {n: "Brindisi", pv: "BR", b: 850, t: 1080, lat: 40.632, lon: 17.936},
-
     {n: "Lecce", pv: "LE", b: 900, t: 1045, lat: 40.351, lon: 18.174},
-
     {n: "Potenza", pv: "PZ", b: 0, t: 860, lat: 40.640, lon: 15.805},
-
     {n: "Matera", pv: "MT", b: 0, t: 795, lat: 40.666, lon: 16.604},
-
     {n: "Cosenza", pv: "CS", b: 0, t: 1195, lat: 39.298, lon: 16.252},
-
     {n: "Catanzaro", pv: "CZ", b: 0, t: 0, lat: 38.909, lon: 16.587},
-
     {n: "Vibo Valentia", pv: "VV", b: 0, t: 0, lat: 38.675, lon: 16.101},
-
     {n: "Reggio Calabria", pv: "RC", b: 0, t: 1700, lat: 38.114, lon: 15.650},
-
     {n: "Messina", pv: "ME", b: 0, t: 2300, lat: 38.193, lon: 15.555},
-
     {n: "Catania", pv: "CT", b: 0, t: 0, lat: 37.502, lon: 15.087},
-
     {n: "Caltanissetta", pv: "CL", b: 0, t: 2300, lat: 37.490, lon: 14.062},
-
     {n: "Siracusa", pv: "SR", b: 0, t: 2300, lat: 37.075, lon: 15.286},
-
     {n: "Ragusa", pv: "RG", b: 0, t: 2300, lat: 36.926, lon: 14.717},
-
     {n: "Palermo", pv: "PA", b: 0, t: 2300, lat: 38.115, lon: 13.361},
-
     {n: "Agrigento", pv: "AG", b: 0, t: 2300, lat: 37.310, lon: 13.576},
-
     {n: "Trapani", pv: "TP", b: 0, t: 0, lat: 38.017, lon: 12.535},
-
     {n: "Nuoro", pv: "NU", b: 0, t: 0, lat: 40.320, lon: 9.326},
-
     {n: "Sassari", pv: "SS", b: 0, t: 2500, lat: 40.727, lon: 8.560},
-
     {n: "Oristano", pv: "OR", b: 0, t: 0, lat: 39.905, lon: 8.591},
-
     {n: "Cagliari", pv: "CA", b: 0, t: 2500, lat: 39.223, lon: 9.121}
-
 ];
 
-
-const SEDE = { lat: 42.67, lon: 14.01 }; // Sede Roseto degli Abruzzi
+const SEDE = { lat: 42.67, lon: 14.01 }; 
 let state = { ruolo: '', tipo: '', metri: 0, scarico: '', province: [] };
 
 function setRuolo(r) { state.ruolo = r; mostra('step1'); }
@@ -388,18 +310,11 @@ function calcola() {
         for(let i=0; i < tappe.length - 1; i++) {
             km += calcolaDist(tappe[i].lat, tappe[i].lon, tappe[i+1].lat, tappe[i+1].lon);
         }
-        
-        // Moltiplicatore 1.18 per accuratezza su distanze stradali (es. Roseto-Milano)
         let kmReali = km * 1.18;
-
-        // Tauro: 1.60 €/km + 40 extra scarico
         let tTot = Math.max(kmReali * 1.60, Math.max(...selezionate.map(p => p.b))) + ((selezionate.length - 1) * 40);
-        
-        // Bosica: 1.50 €/km + 30 extra scarico
         let bTot = Math.max(kmReali * 1.50, Math.max(...selezionate.map(p => p.t))) + ((selezionate.length - 1) * 30);
 
         html += `Giro: ${state.province.join(' → ')}<br>KM stimati: ${kmReali.toFixed(0)}<hr>`;
-        
         if(state.ruolo === 'commerciale') {
             html += `<h2>TOTALE: € ${Math.max(tTot, bTot).toFixed(2)}</h2>`;
         } else {
@@ -432,7 +347,3 @@ function indietro() {
 </script>
 </body>
 </html>
-
-
-
-
