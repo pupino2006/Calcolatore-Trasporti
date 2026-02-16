@@ -209,7 +209,7 @@ async function calcola() {
     const kmReali = await getKm(state.province);
     const kmMaggiorati = kmReali * 1.05; // +5%
     const numScarichiExtra = state.province.length - 1;
-    const extraScarichi = numScarichiExtra * 50; // 50€ ogni scarico dopo il primo
+    const extraScarichi = numScarichiExtra * 40; // 50€ ogni scarico dopo il primo
 
     let costoB = 0;
     let costoT = 0;
@@ -259,3 +259,4 @@ function indietro() {
 </script>
 </body>
 </html>
+
