@@ -9,7 +9,6 @@
             --blue: #005aab; 
             --light-blue: #e3f2fd; 
             --hover-blue: #bbdefb; 
-            --orange: #ff8c00; 
             --gray: #f4f7f6; 
             --admin: #2c3e50; 
         }
@@ -54,7 +53,7 @@
 
         @media print {
             .nav-bar, .btn-main, .btn-small, .btn-print, .search-box { display: none !important; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            .container { box-shadow: none; border: none; width: 100%; }
         }
     </style>
 </head>
@@ -67,7 +66,7 @@
     </div>
 
     <div class="header">
-        <img src="logo.png" alt="Logo Pannelli Termici">
+        <img src="logo.png" alt="Logo">
     </div>
 
     <div id="stepHome" class="step active">
@@ -194,41 +193,20 @@ const db = [
     {n: "Roma", pv: "RM", b: 530, t: 605, lat: 41.890, lon: 12.496},
     {n: "Latina", pv: "LT", b: 595, t: 595, lat: 41.467, lon: 12.903},
     {n: "Frosinone", pv: "FR", b: 540, t: 585, lat: 41.639, lon: 13.341},
-    {n: "Viterbo", pv: "VT", b: 0, t: 0, lat: 42.417, lon: 12.101},
     {n: "Teramo", pv: "TE", b: 190, t: 260, lat: 42.658, lon: 13.704},
     {n: "Pescara", pv: "PE", b: 260, t: 400, lat: 42.461, lon: 14.214},
     {n: "Chieti", pv: "CH", b: 310, t: 395, lat: 42.351, lon: 14.167},
     {n: "L’Aquila", pv: "AQ", b: 310, t: 385, lat: 42.348, lon: 13.397},
-    {n: "Isernia", pv: "IS", b: 500, t: 0, lat: 41.591, lon: 14.232},
     {n: "Campobasso", pv: "CB", b: 535, t: 640, lat: 41.560, lon: 14.662},
     {n: "Benevento", pv: "BN", b: 670, t: 745, lat: 41.130, lon: 14.777},
     {n: "Caserta", pv: "CE", b: 655, t: 730, lat: 41.073, lon: 14.331},
     {n: "Napoli", pv: "NA", b: 720, t: 855, lat: 40.851, lon: 14.268},
-    {n: "Avellino", pv: "AV", b: 0, t: 640, lat: 40.914, lon: 14.791},
     {n: "Salerno", pv: "SA", b: 850, t: 885, lat: 40.677, lon: 14.765},
     {n: "Foggia", pv: "FG", b: 550, t: 630, lat: 41.462, lon: 15.544},
     {n: "Bari", pv: "BA", b: 720, t: 690, lat: 41.117, lon: 16.871},
     {n: "Taranto", pv: "TA", b: 820, t: 850, lat: 40.464, lon: 17.247},
     {n: "Brindisi", pv: "BR", b: 850, t: 1080, lat: 40.632, lon: 17.936},
-    {n: "Lecce", pv: "LE", b: 900, t: 1045, lat: 40.351, lon: 18.174},
-    {n: "Potenza", pv: "PZ", b: 0, t: 860, lat: 40.640, lon: 15.805},
-    {n: "Matera", pv: "MT", b: 0, t: 795, lat: 40.666, lon: 16.604},
-    {n: "Cosenza", pv: "CS", b: 0, t: 1195, lat: 39.298, lon: 16.252},
-    {n: "Catanzaro", pv: "CZ", b: 0, t: 0, lat: 38.909, lon: 16.587},
-    {n: "Vibo Valentia", pv: "VV", b: 0, t: 0, lat: 38.675, lon: 16.101},
-    {n: "Reggio Calabria", pv: "RC", b: 0, t: 1700, lat: 38.114, lon: 15.650},
-    {n: "Messina", pv: "ME", b: 0, t: 2300, lat: 38.193, lon: 15.555},
-    {n: "Catania", pv: "CT", b: 0, t: 0, lat: 37.502, lon: 15.087},
-    {n: "Caltanissetta", pv: "CL", b: 0, t: 2300, lat: 37.490, lon: 14.062},
-    {n: "Siracusa", pv: "SR", b: 0, t: 2300, lat: 37.075, lon: 15.286},
-    {n: "Ragusa", pv: "RG", b: 0, t: 2300, lat: 36.926, lon: 14.717},
-    {n: "Palermo", pv: "PA", b: 0, t: 2300, lat: 38.115, lon: 13.361},
-    {n: "Agrigento", pv: "AG", b: 0, t: 2300, lat: 37.310, lon: 13.576},
-    {n: "Trapani", pv: "TP", b: 0, t: 0, lat: 38.017, lon: 12.535},
-    {n: "Nuoro", pv: "NU", b: 0, t: 0, lat: 40.320, lon: 9.326},
-    {n: "Sassari", pv: "SS", b: 0, t: 2500, lat: 40.727, lon: 8.560},
-    {n: "Oristano", pv: "OR", b: 0, t: 0, lat: 39.905, lon: 8.591},
-    {n: "Cagliari", pv: "CA", b: 0, t: 2500, lat: 39.223, lon: 9.121}
+    {n: "Lecce", pv: "LE", b: 900, t: 1045, lat: 40.351, lon: 18.174}
 ];
 
 const SEDE = { lat: 42.67, lon: 14.01 }; 
@@ -241,14 +219,16 @@ function verificaLogin() {
     if(document.getElementById('passAdmin').value === '2026') {
         state.ruolo = 'amministratore';
         mostra('step1');
-    } else {
-        alert("Password Errata");
-    }
+    } else { alert("Password Errata"); }
 }
 
 function setTipo(t) { state.tipo = t; mostra(t === 'parziale' ? 'stepMetri' : 'stepScarico'); }
 function vaiAScarico() { state.metri = document.getElementById('metri').value; mostra('stepScarico'); }
-function setScarico(s) { state.scarico = s; document.getElementById('configTitle').innerText = s === 'singolo' ? 'Destinazione' : 'Ordine di Scarico'; mostra('stepConfig'); }
+function setScarico(s) { 
+    state.scarico = s; 
+    document.getElementById('configTitle').innerText = s === 'singolo' ? 'Destinazione' : 'Ordine di Scarico'; 
+    mostra('stepConfig'); 
+}
 
 function cercaProv(v) {
     const sug = document.getElementById('suggerimenti');
@@ -259,9 +239,12 @@ function cercaProv(v) {
 }
 
 function seleziona(nome) {
-    const pObj = db.find(x => x.n === nome);
-    if(state.scarico === 'singolo') state.province = [pObj];
-    else if(!state.province.find(x => x.n === nome)) state.province.push(pObj);
+    const provinciaSelezionata = db.find(x => x.n === nome);
+    if(state.scarico === 'singolo') {
+        state.province = [provinciaSelezionata];
+    } else {
+        if(!state.province.find(x => x.n === nome)) state.province.push(provinciaSelezionata);
+    }
     document.getElementById('suggerimenti').style.display = 'none';
     document.getElementById('cerca').value = '';
     disegnaTag();
@@ -288,20 +271,17 @@ function calcola() {
 
     let opzioni = [];
 
-    // --- CORREZIONE ASSEGNAZIONE INVERTITA ---
-    // Milano esempio: colonna 'b' è 750 (Bosica), colonna 't' è 840 (Tauro)
-    // Se apparivano invertiti, li ri-assegniamo correttamente:
-
-    // 1. TAURO (legge dalla colonna 't')
-    if (p.t > 0) {
-        let prezzoT = (state.tipo === 'parziale') ? (dist * 1.60 * coeff) : p.t;
-        opzioni.push({ nome: "TAURO", prezzo: prezzoT });
-    }
-
-    // 2. BOSICA (legge dalla colonna 'b')
+    // --- LOGICA PREZZI FISSI / KM ---
+    // Ricordando che p.b = Bosica e p.t = Tauro (corretti per Milano 750/840)
+    
     if (p.b > 0) {
         let prezzoB = (state.tipo === 'parziale') ? (dist * 1.50 * coeff) : p.b;
         opzioni.push({ nome: "BOSICA", prezzo: prezzoB });
+    }
+
+    if (p.t > 0) {
+        let prezzoT = (state.tipo === 'parziale') ? (dist * 1.60 * coeff) : p.t;
+        opzioni.push({ nome: "TAURO", prezzo: prezzoT });
     }
 
     opzioni.forEach(opt => {
