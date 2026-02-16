@@ -3,58 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pannelli Termici - Trasporti</title>
+    <title>Pannelli Termici - Preventivatore</title>
     <style>
-        :root { 
-            --blue: #005aab; 
-            --light-blue: #e3f2fd; 
-            --hover-blue: #bbdefb; 
-            --gray: #f4f7f6; 
-            --admin: #2c3e50; 
-        }
-        
-        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; -webkit-tap-highlight-color: transparent; }
+        :root { --blue: #005aab; --light-blue: #e3f2fd; --admin: #2c3e50; --gray: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--gray); margin: 0; padding: 15px; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        .header { text-align: center; margin-bottom: 20px; }
-        .header img { max-width: 100%; height: auto; max-height: 120px; display: block; margin: 0 auto; }
-
         h1 { font-size: 18px; color: var(--blue); text-transform: uppercase; text-align: center; }
         .step { display: none; }
         .step.active { display: block; }
-        .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        
-        .btn-small { background: #ddd; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        
-        .card { 
-            background-color: var(--light-blue); 
-            border: 2px solid #c2e3f7; 
-            padding: 20px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            text-align: center; 
-            margin-bottom: 15px; 
-            transition: all 0.2s ease; 
-            color: var(--blue);
-        }
-        .card:hover { background-color: var(--hover-blue); transform: translateY(-2px); }
-        .card.admin-card { border-color: var(--admin); color: var(--admin); background-color: #f8f9fa; }
-
-        .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        .btn-print { background: #27ae60; margin-top: 10px; }
-        
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
-        .suggestions { position: absolute; width: 100%; background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; z-index: 10; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .card { background: var(--light-blue); border: 2px solid #c2e3f7; padding: 20px; border-radius: 10px; cursor: pointer; text-align: center; margin-bottom: 15px; color: var(--blue); transition: 0.2s; }
+        .card:hover { background: #bbdefb; transform: translateY(-2px); }
+        .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; margin-top: 10px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; font-size: 16px; box-sizing: border-box; }
+        .suggestions { background: white; border: 1px solid #ccc; max-height: 200px; overflow-y: auto; position: absolute; width: 100%; z-index: 10; display: none; }
         .suggestions div { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .tag { display: inline-block; background: var(--blue); color: white; padding: 5px 10px; border-radius: 5px; margin: 5px 5px 0 0; font-size: 13px; }
-        
-        .result { background: #eef9ff; padding: 20px; border-radius: 10px; border-left: 5px solid var(--blue); margin-top: 20px; line-height: 1.5; }
-        .price-box { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 12px; background: white; border-radius: 8px; border: 1px solid #ddd; }
-
-        @media print {
-            .nav-bar, .btn-main, .btn-small, .btn-print, .search-box { display: none !important; }
-            .container { box-shadow: none; border: none; width: 100%; }
-        }
+        .tag { display: inline-block; background: var(--blue); color: white; padding: 5px 10px; border-radius: 5px; margin: 5px 5px 0 0; }
+        .result { background: #eef9ff; padding: 20px; border-radius: 10px; border-left: 5px solid var(--blue); margin-top: 20px; }
+        .price-box { display: flex; justify-content: space-between; padding: 12px; background: white; border-radius: 8px; border: 1px solid #ddd; margin-top: 10px; }
+        .nav-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        .btn-small { background: #ddd; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -65,52 +32,38 @@
         <button class="btn-small" onclick="indietro()">⬅️ Indietro</button>
     </div>
 
-    <div class="header">
-        <img src="logo-icon.png" alt="Logo">
-    </div>
-
     <div id="stepHome" class="step active">
-        <h1>Seleziona Accesso</h1>
-        <div class="card" onclick="setRuolo('commerciale')"><h3>ACCESSO COMMERCIALE</h3></div>
-        <div class="card admin-card" onclick="mostraLogin()"><h3>ACCESSO AMMINISTRATORE</h3></div>
+        <h1>Accesso</h1>
+        <div class="card" onclick="setRuolo('commerciale')">ACCESSO COMMERCIALE</div>
+        <div class="card" onclick="mostraLogin()" style="border-color:var(--admin); color:var(--admin)">ACCESSO AMMINISTRATORE</div>
     </div>
 
     <div id="stepLogin" class="step">
-        <h1>Login Amministratore</h1>
-        <input type="password" id="passAdmin" placeholder="Inserisci Password">
+        <h1>Login</h1>
+        <input type="password" id="passAdmin" placeholder="Password">
         <button class="btn-main" onclick="verificaLogin()" style="background:var(--admin)">Accedi</button>
     </div>
 
     <div id="step1" class="step">
-        <h1>Tipo di Carico</h1>
-        <div class="card" onclick="setTipo('completo')"><h3>CARICO COMPLETO</h3></div>
-        <div class="card" onclick="setTipo('parziale')"><h3>CARICO PARZIALE</h3></div>
+        <h1>Carico</h1>
+        <div class="card" onclick="setTipo('completo')">CARICO COMPLETO</div>
+        <div class="card" onclick="setTipo('parziale')">CARICO PARZIALE</div>
     </div>
 
     <div id="stepMetri" class="step">
         <h1>Lunghezza Merce</h1>
         <select id="metri">
-            <option value="3">3 Metri (50%)</option>
-            <option value="4">4 Metri (57%)</option>
-            <option value="5">5 Metri (64%)</option>
-            <option value="6">6 Metri (71%)</option>
-            <option value="7">7 Metri (78%)</option>
-            <option value="8">8 Metri (85%)</option>
-            <option value="9">9 Metri (92%)</option>
-            <option value="10">10 Metri (99%)</option>
+            <option value="3">3 Metri</option><option value="4">4 Metri</option>
+            <option value="5">5 Metri</option><option value="6">6 Metri</option>
+            <option value="7">7 Metri</option><option value="8">8 Metri</option>
+            <option value="9">9 Metri</option><option value="10">10 Metri</option>
         </select>
-        <button class="btn-main" onclick="vaiAScarico()" style="margin-top:20px;">Avanti</button>
-    </div>
-
-    <div id="stepScarico" class="step">
-        <h1>Destinazione</h1>
-        <div class="card" onclick="setScarico('singolo')"><h3>SCARICO SINGOLO</h3></div>
-        <div class="card" onclick="setScarico('multiplo')"><h3>SCARICO MULTIPLO</h3></div>
+        <button class="btn-main" onclick="mostra('stepConfig')">Avanti</button>
     </div>
 
     <div id="stepConfig" class="step">
-        <h1 id="configTitle">Seleziona Province</h1>
-        <div class="search-box" style="position:relative;">
+        <h1 id="configTitle">Destinazioni</h1>
+        <div style="position:relative;">
             <input type="text" id="cerca" placeholder="Cerca Provincia..." oninput="cercaProv(this.value)">
             <div id="suggerimenti" class="suggestions"></div>
         </div>
@@ -120,8 +73,7 @@
 
     <div id="stepResult" class="step">
         <div id="dettaglio" class="result"></div>
-        <button class="btn-main btn-print" onclick="window.print()">📄 SALVA / STAMPA PDF</button>
-        <button class="btn-main" style="margin-top:15px; background:#666;" onclick="location.reload()">Nuovo Calcolo</button>
+        <button class="btn-main" onclick="location.reload()" style="background:#666">Nuovo Calcolo</button>
     </div>
 </div>
 
@@ -210,26 +162,13 @@ const db = [
     {n: "Lecce", pv: "LE", b: 900, t: 1045, lat: 40.351, lon: 18.174}
 ];
 
-const SEDE = { lat: 42.6710, lon: 14.0150 }; 
-let state = { ruolo: '', tipo: '', metri: 0, scarico: '', province: [] };
+const SEDE = { lat: 42.671, lon: 14.015 };
+let state = { ruolo: '', tipo: '', metri: 0, province: [] };
 
 function setRuolo(r) { state.ruolo = r; mostra('step1'); }
 function mostraLogin() { mostra('stepLogin'); }
-
-function verificaLogin() {
-    if(document.getElementById('passAdmin').value === '2026') {
-        state.ruolo = 'amministratore';
-        mostra('step1');
-    } else { alert("Password Errata"); }
-}
-
-function setTipo(t) { state.tipo = t; mostra(t === 'parziale' ? 'stepMetri' : 'stepScarico'); }
-function vaiAScarico() { state.metri = document.getElementById('metri').value; mostra('stepScarico'); }
-function setScarico(s) { 
-    state.scarico = s; 
-    document.getElementById('configTitle').innerText = s === 'singolo' ? 'Destinazione' : 'Ordine di Scarico'; 
-    mostra('stepConfig'); 
-}
+function verificaLogin() { if(document.getElementById('passAdmin').value === '2026') { state.ruolo='amministratore'; mostra('step1'); } }
+function setTipo(t) { state.tipo = t; mostra(t === 'parziale' ? 'stepMetri' : 'stepConfig'); }
 
 function cercaProv(v) {
     const sug = document.getElementById('suggerimenti');
@@ -240,19 +179,21 @@ function cercaProv(v) {
 }
 
 function seleziona(nome) {
-    const provinciaSelezionata = db.find(x => x.n === nome);
-    if(state.scarico === 'singolo') {
-        state.province = [provinciaSelezionata];
-    } else {
-        if(!state.province.find(x => x.n === nome)) state.province.push(provinciaSelezionata);
-    }
+    const p = db.find(x => x.n === nome);
+    if(!state.province.find(x => x.n === nome)) state.province.push(p);
     document.getElementById('suggerimenti').style.display = 'none';
     document.getElementById('cerca').value = '';
-    disegnaTag();
+    document.getElementById('listaSelezionate').innerHTML = state.province.map(x => `<span class="tag">${x.n}</span>`).join('');
 }
 
-function disegnaTag() {
-    document.getElementById('listaSelezionate').innerHTML = state.province.map(p => `<span class="tag">${p.n}</span>`).join('');
+async function getKm(provinceList) {
+    let coords = `${SEDE.lon},${SEDE.lat}`;
+    provinceList.forEach(p => coords += `;${p.lon},${p.lat}`);
+    try {
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=false`);
+        const data = await res.json();
+        return data.routes[0].distance / 1000;
+    } catch { return 0; }
 }
 
 function getCoeff(m) {
@@ -260,81 +201,50 @@ function getCoeff(m) {
     return map[m] || 1;
 }
 
-// OSRM: Calcola la distanza totale di un itinerario (Sede -> P1 -> P2 -> Pn)
-async function getFullRouteDistance(provinceList) {
-    let coordinates = `${SEDE.lon},${SEDE.lat}`;
-    provinceList.forEach(p => {
-        coordinates += `;${p.lon},${p.lat}`;
-    });
-
-    try {
-        const response = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=false`);
-        const data = await response.json();
-        if (data.routes && data.routes.length > 0) {
-            return (data.routes[0].distance / 1000); // Ritorna km totali
-        }
-        return null;
-    } catch (e) {
-        return null;
-    }
-}
-
 async function calcola() {
-    if (state.province.length === 0) return alert("Seleziona almeno una provincia");
-
-    document.getElementById('dettaglio').innerHTML = "Calcolo itinerario stradale...";
+    if(state.province.length === 0) return alert("Seleziona una destinazione");
     mostra('stepResult');
+    document.getElementById('dettaglio').innerHTML = "Calcolo in corso...";
 
-    const distTotale = await getFullRouteDistance(state.province);
-    const coeff = (state.tipo === 'parziale') ? getCoeff(state.metri) : 1;
-    
-    let risultatiHTML = `<h3>Riepilogo Destinazioni</h3>`;
-    risultatiHTML += `<p>${state.province.map(p => p.n).join(' ➔ ')}</p>`;
-    
-    // NASCONDI KM SE SINGOLO
-    if (state.scarico !== 'singolo') {
-        risultatiHTML += `<p>Distanza totale itinerario: <b>${distTotale ? distTotale.toFixed(0) : 'N/D'} km</b></p><hr>`;
-    } else {
-        risultatiHTML += `<hr>`;
-    }
+    const kmReali = await getKm(state.province);
+    const kmMaggiorati = kmReali * 1.05; // +5%
+    const numScarichiExtra = state.province.length - 1;
+    const extraScarichi = numScarichiExtra * 50; // 50€ ogni scarico dopo il primo
 
-    let costoBosica = 0;
-    let costoTauro = 0;
+    let costoB = 0;
+    let costoT = 0;
 
     if (state.tipo === 'parziale') {
-        // Logica Parziale: Km totali * tariffa km * coefficiente metri
-        costoBosica = distTotale * 1.50 * coeff;
-        costoTauro = distTotale * 1.60 * coeff;
+        const coeff = getCoeff(document.getElementById('metri').value);
+        costoB = kmMaggiorati * 1.50 * coeff;
+        costoT = kmMaggiorati * 1.60 * coeff;
     } else {
-        // Logica Completo: Somma dei prezzi base delle province selezionate
-        state.province.forEach(p => {
-            costoBosica += p.b;
-            costoTauro += p.t;
-        });
+        // CARICO COMPLETO
+        if (state.province.length === 1) {
+            // Se singolo, prendi il prezzo fisso del DB
+            costoB = state.province[0].b;
+            costoT = state.province[0].t;
+        } else {
+            // Se multiplo: (Km + 5%) * tariffa + (50€ * scarichi extra)
+            costoB = (kmMaggiorati * 1.50) + extraScarichi;
+            costoT = (kmMaggiorati * 1.60) + extraScarichi;
+        }
     }
+
+    let html = `<h3>Riepilogo ${state.tipo.toUpperCase()}</h3>`;
+    html += `<p>Percorso: ${state.province.map(p => p.n).join(' ➔ ')}</p>`;
+    html += `<p>Distanza (+5%): <b>${kmMaggiorati.toFixed(0)} km</b></p>`;
+    if(numScarichiExtra > 0) html += `<p>Scarichi extra: ${numScarichiExtra} (+${extraScarichi}€)</p>`;
+    html += `<hr>`;
 
     if (state.ruolo === 'commerciale') {
-        const maxCosto = Math.max(costoBosica, costoTauro);
-        risultatiHTML += `
-            <div class="price-box">
-                <span><strong>QUOTA TRASPORTO</strong></span>
-                <span style="color:var(--blue); font-weight:bold;">€ ${maxCosto.toFixed(2)}</span>
-            </div>
-            <p style="font-size:11px; color:gray; margin-top:10px;">* Prezzo finito per il cliente finale.</p>`;
+        html += `<div class="price-box"><strong>QUOTA TRASPORTO</strong> <span>€ ${Math.max(costoB, costoT).toFixed(2)}</span></div>`;
     } else {
-        // Amministratore vede tutto
-        risultatiHTML += `
-            <div class="price-box">
-                <span><strong>BOSICA</strong></span>
-                <span style="color:var(--admin); font-weight:bold;">€ ${costoBosica.toFixed(2)}</span>
-            </div>
-            <div class="price-box">
-                <span><strong>TAURO</strong></span>
-                <span style="color:var(--admin); font-weight:bold;">€ ${costoTauro.toFixed(2)}</span>
-            </div>`;
+        html += `<div class="price-box"><strong>BOSICA</strong> <span>€ ${costoB.toFixed(2)}</span></div>`;
+        html += `<div class="price-box"><strong>TAURO</strong> <span>€ ${costoT.toFixed(2)}</span></div>`;
     }
 
-    document.getElementById('dettaglio').innerHTML = risultatiHTML;
+    document.getElementById('dettaglio').innerHTML = html;
 }
 
 function mostra(id) {
@@ -343,9 +253,8 @@ function mostra(id) {
 }
 
 function indietro() {
-    const steps = ['stepHome', 'stepLogin', 'step1', 'stepMetri', 'stepScarico', 'stepConfig', 'stepResult'];
-    let current = steps.findIndex(s => document.getElementById(s).classList.contains('active'));
-    if(current > 0) mostra(steps[current-1]);
+    const steps = ['stepHome', 'step1', 'stepConfig', 'stepResult'];
+    mostra('step1');
 }
 </script>
 </body>
