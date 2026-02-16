@@ -283,49 +283,45 @@ function disegnaTag() {
 }
 
 function calcola() {
-    if(state.province.length === 0) return alert("Seleziona almeno una provincia");
-    const selezionate = state.province.map(n => db.find(x => x.n === n));
-    let html = `<div style="text-align:center;"><strong>PANNELLI TERMICI SRL</strong></div><br>
-                Rapporto: ${state.ruolo.toUpperCase()}<br>
-                Data: ${new Date().toLocaleDateString()}<hr>`;
+    if (state.province.length === 0) return alert("Seleziona almeno una provincia");
 
-    if(state.scarico === 'singolo') {
-        let p = selezionate[0];
-        let tBase = p.b; let bBase = p.t;
-        if(state.tipo === 'parziale') {
-            let perc = 0.50 + ((state.metri - 3) * 0.07);
-            tBase *= perc; bBase *= perc;
-        }
+    const dist = calcolaDistanza(SEDE, state.province[0]);
+    const coeff = (state.tipo === 'parziale') ? getCoeff(state.metri) : 1;
+    
+    let risultatiHTML = `<h3>Preventivo per ${state.province[0].n}</h3>`;
+    risultatiHTML += `<p>Distanza stimata: <b>${dist} km</b></p><hr>`;
 
-        if(state.ruolo === 'commerciale') {
-            html += `Destinazione: ${p.n}<br>Tipo: ${state.tipo}<hr><h2>TOTALE: € ${Math.max(tBase, bBase).toFixed(2)}</h2>`;
-        } else {
-            html += `Destinazione: ${p.n}<br>Tipo: ${state.tipo}<hr>`;
-            html += `<div class="price-box"><span>TAURO:</span> <b>€ ${tBase.toFixed(2)}</b></div>`;
-            html += `<div class="price-box"><span>BOSICA:</span> <b>€ ${bBase.toFixed(2)}</b></div>`;
-        }
-    } else {
-        let tappe = [SEDE, ...selezionate];
-        let km = 0;
-        for(let i=0; i < tappe.length - 1; i++) {
-            km += calcolaDist(tappe[i].lat, tappe[i].lon, tappe[i+1].lat, tappe[i+1].lon);
-        }
-        let kmReali = km * 1.18;
-        let tTot = Math.max(kmReali * 1.60, Math.max(...selezionate.map(p => p.b))) + ((selezionate.length - 1) * 40);
-        let bTot = Math.max(kmReali * 1.50, Math.max(...selezionate.map(p => p.t))) + ((selezionate.length - 1) * 30);
+    // --- CORREZIONE ASSEGNAZIONE TRASPORTATORI ---
+    // p.b = 750 (ora assegnato a BOSICA)
+    // p.t = 840 (ora assegnato a TAURO)
+    
+    let p = state.province[0];
+    let opzioni = [];
 
-        html += `Giro: ${state.province.join(' → ')}<br>KM stimati: ${kmReali.toFixed(0)}<hr>`;
-        if(state.ruolo === 'commerciale') {
-            html += `<h2>TOTALE: € ${Math.max(tTot, bTot).toFixed(2)}</h2>`;
-        } else {
-            html += `<div class="price-box admin-result"><span>TAURO (1.60/km + 40€):</span> <b>€ ${tTot.toFixed(2)}</b></div>`;
-            html += `<div class="price-box admin-result"><span>BOSICA (1.50/km + 30€):</span> <b>€ ${bTot.toFixed(2)}</b></div>`;
-        }
+    // Calcolo BOSICA (usa valore colonna 'b')
+    if (p.b > 0) {
+        let prezzoB = (state.tipo === 'parziale') ? (dist * 1.50 * coeff) : p.b;
+        opzioni.push({ nome: "BOSICA", prezzo: prezzoB });
     }
-    document.getElementById('dettaglio').innerHTML = html;
+
+    // Calcolo TAURO (usa valore colonna 't')
+    if (p.t > 0) {
+        let prezzoT = (state.tipo === 'parziale') ? (dist * 1.60 * coeff) : p.t;
+        opzioni.push({ nome: "TAURO", prezzo: prezzoT });
+    }
+    // --------------------------------------------
+
+    opzioni.forEach(opt => {
+        risultatiHTML += `
+            <div class="price-box">
+                <span><strong>${opt.nome}</strong></span>
+                <span style="color:var(--blue); font-weight:bold;">€ ${opt.prezzo.toFixed(2)}</span>
+            </div>`;
+    });
+
+    document.getElementById('dettaglio').innerHTML = risultatiHTML;
     mostra('stepResult');
 }
-
 function calcolaDist(lat1, lon1, lat2, lon2) {
     const R = 6371;
     const dLat = (lat2-lat1) * Math.PI / 180;
@@ -347,3 +343,4 @@ function indietro() {
 </script>
 </body>
 </html>
+
