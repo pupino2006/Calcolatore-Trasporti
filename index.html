@@ -328,7 +328,12 @@ async function calcola() {
             ? state.province[state.province.length - 1] 
             : state.province[0];
         html += `<p>Lunghezza: <b>${state.metri} mt</b> (${(coeff * 100).toFixed(0)}% del completo)</p>`;
-        html += `<p>Prezzo completo riferimento: <b>€ ${provRiferimento.b.toFixed(2)}</b> (Bosica) / <b>€ ${provRiferimento.t.toFixed(2)}</b> (Tauro)</p>`;
+        // Per commerciali mostra solo il prezzo più alto, per admin mostra entrambi
+        if (state.ruolo === 'amministratore') {
+            html += `<p>Prezzo completo riferimento: <b>€ ${provRiferimento.b.toFixed(2)}</b> / <b>€ ${provRiferimento.t.toFixed(2)}</b></p>`;
+        } else {
+            html += `<p>Prezzo completo riferimento: <b>€ ${Math.max(provRiferimento.b, provRiferimento.t).toFixed(2)}</b></p>`;
+        }
     }
     
     if (numScarichiExtra > 0) html += `<p>Scarichi extra: ${numScarichiExtra}</p>`;
