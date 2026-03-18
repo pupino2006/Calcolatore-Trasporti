@@ -282,8 +282,18 @@ async function calcola() {
 
     if (state.tipo === 'parziale') {
         const coeff = getCoeff(document.getElementById('metri').value);
-        costoBosica = (kmMaggiorati * 1.50 * coeff) + (numScarichiExtra * 30);
-        costoTauro = (kmMaggiorati * 1.60 * coeff) + (numScarichiExtra * 40);
+        
+        // Per i parziali usiamo il prezzo del completo come base
+        // Per scarico singolo: prima provincia, per multiplo: ultima provincia (destinazione finale)
+        const provRiferimento = (state.scarico === 'multiplo') 
+            ? state.province[state.province.length - 1] 
+            : state.province[0];
+        
+        const baseBosica = provRiferimento.b;
+        const baseTauro = provRiferimento.t;
+        
+        costoBosica = (baseBosica * coeff) + (numScarichiExtra * 30);
+        costoTauro = (baseTauro * coeff) + (numScarichiExtra * 40);
     } else {
         // CARICO COMPLETO
         if (state.scarico === 'singolo') {
@@ -307,13 +317,23 @@ async function calcola() {
     let html = `<h3>Riepilogo ${state.tipo.toUpperCase()}</h3>`;
     html += `<p>Percorso: ${state.province.map(p => p.n).join(' ➔ ')}</p>`;
     
-    if (state.scarico !== 'singolo') {
+    // Mostra distanza per scarico multiplo o per parziali
+    if (state.scarico !== 'singolo' || state.tipo === 'parziale') {
         html += `<p>Distanza totale (+5%): <b>${kmMaggiorati.toFixed(0)} km</b></p>`;
-        if(numScarichiExtra > 0) html += `<p>Scarichi extra: ${numScarichiExtra}</p>`;
-        html += `<hr>`;
-    } else {
-        html += `<hr>`;
     }
+    
+    if (state.tipo === 'parziale') {
+        const coeff = getCoeff(document.getElementById('metri').value);
+        const provRiferimento = (state.scarico === 'multiplo') 
+            ? state.province[state.province.length - 1] 
+            : state.province[0];
+        html += `<p>Lunghezza: <b>${state.metri} mt</b> (${(coeff * 100).toFixed(0)}% del completo)</p>`;
+        html += `<p>Prezzo completo riferimento: <b>€ ${provRiferimento.b.toFixed(2)}</b> (Bosica) / <b>€ ${provRiferimento.t.toFixed(2)}</b> (Tauro)</p>`;
+    }
+    
+    if (numScarichiExtra > 0) html += `<p>Scarichi extra: ${numScarichiExtra}</p>`;
+    
+    html += `<hr>`;
 
     if (state.ruolo === 'commerciale') {
         html += `<div class="price-box"><strong>QUOTA TRASPORTO</strong> <span style="color:var(--blue); font-weight:bold;">€ ${Math.max(costoBosica, costoTauro).toFixed(2)}</span></div>`;
