@@ -88,16 +88,16 @@
     </div>
 
     <div id="stepMetri" class="step">
-        <h1>Lunghezza Merce</h1>
-        <select id="metri">
-            <option value="3">3 Metri (50%)</option>
-            <option value="4">4 Metri (57%)</option>
-            <option value="5">5 Metri (64%)</option>
-            <option value="6">6 Metri (71%)</option>
-            <option value="7">7 Metri (78%)</option>
-            <option value="8">8 Metri (85%)</option>
-            <option value="9">9 Metri (92%)</option>
-            <option value="10">10 Metri (99%)</option>
+        <h1>Ingombro Merce (mc)</h1>
+        <select id="mc">
+            <option value="0.5">0,5 mc</option>
+            <option value="1">1 mc</option>
+            <option value="1.5">1,5 mc</option>
+            <option value="2">2 mc</option>
+            <option value="2.5">2,5 mc</option>
+            <option value="3">3 mc</option>
+            <option value="3.5">3,5 mc</option>
+            <option value="4">4 mc</option>
         </select>
         <button class="btn-main" onclick="vaiAScarico()" style="margin-top:20px;">Avanti</button>
     </div>
@@ -211,7 +211,7 @@ const db = [
 
 
 const SEDE = { lat: 42.6710, lon: 14.0150 }; 
-let state = { ruolo: '', tipo: '', metri: 0, scarico: '', province: [] };
+let state = { ruolo: '', tipo: '', mc: 0, scarico: '', province: [] };
 
 function setRuolo(r) { state.ruolo = r; mostra('step1'); }
 function mostraLogin() { mostra('stepLogin'); }
@@ -223,7 +223,7 @@ function verificaLogin() {
 }
 
 function setTipo(t) { state.tipo = t; mostra(t === 'parziale' ? 'stepMetri' : 'stepScarico'); }
-function vaiAScarico() { state.metri = document.getElementById('metri').value; mostra('stepScarico'); }
+function vaiAScarico() { state.mc = parseFloat(document.getElementById('mc').value); mostra('stepScarico'); }
 function setScarico(s) { 
     state.scarico = s; 
     document.getElementById('configTitle').innerText = s === 'singolo' ? 'Destinazione' : 'Ordine di Scarico'; 
@@ -260,9 +260,16 @@ async function getKm(provinceList) {
     } catch { return 0; }
 }
 
-function getCoeff(m) {
-    const map = { "3": 0.50, "4": 0.57, "5": 0.64, "6": 0.71, "7": 0.78, "8": 0.85, "9": 0.92, "10": 0.99 };
-    return map[m] || 1;
+function calcolaPrezzoMc(mc, numScarichiExtra) {
+    let costo = 0;
+    if (mc <= 2) {
+        costo = mc * 150;
+    } else if (mc <= 4) {
+        costo = (2 * 150) + ((mc - 2) * 100);
+    } else {
+        costo = (2 * 150) + (2 * 100);
+    }
+    return costo + (numScarichiExtra * 30);
 }
 
 async function calcola() {
@@ -270,31 +277,20 @@ async function calcola() {
     document.getElementById('dettaglio').innerHTML = "Calcolo in corso...";
     mostra('stepResult');
 
-    const kmReali = await getKm(state.province);
-    const kmMaggiorati = kmReali * 1.05;
     const numScarichiExtra = state.province.length - 1;
-    
-    // Identifichiamo l'ultima destinazione (la finale)
-    const ultimaProv = state.province[state.province.length - 1];
+    let kmMaggiorati = 0;
 
     let costoBosica = 0;
     let costoTauro = 0;
 
     if (state.tipo === 'parziale') {
-        const coeff = getCoeff(document.getElementById('metri').value);
-        
-        // Per i parziali usiamo il prezzo del completo come base
-        // Per scarico singolo: prima provincia, per multiplo: ultima provincia (destinazione finale)
-        const provRiferimento = (state.scarico === 'multiplo') 
-            ? state.province[state.province.length - 1] 
-            : state.province[0];
-        
-        const baseBosica = provRiferimento.b;
-        const baseTauro = provRiferimento.t;
-        
-        costoBosica = (baseBosica * coeff) + (numScarichiExtra * 30);
-        costoTauro = (baseTauro * coeff) + (numScarichiExtra * 40);
+        const prezzoMc = calcolaPrezzoMc(state.mc, numScarichiExtra);
+        costoBosica = prezzoMc;
+        costoTauro = prezzoMc;
     } else {
+        const kmReali = await getKm(state.province);
+        kmMaggiorati = kmReali * 1.05;
+        const ultimaProv = state.province[state.province.length - 1];
         // CARICO COMPLETO
         if (state.scarico === 'singolo') {
             costoBosica = state.province[0].b;
@@ -315,25 +311,27 @@ async function calcola() {
     }
 
     let html = `<h3>Riepilogo ${state.tipo.toUpperCase()}</h3>`;
-    html += `<p>Percorso: ${state.province.map(p => p.n).join(' ➔ ')}</p>`;
     
-    // Mostra distanza per scarico multiplo o per parziali
-    if (state.scarico !== 'singolo' || state.tipo === 'parziale') {
+    // Mostra percorso solo per carico completo
+    if (state.tipo === 'completo') {
+        html += `<p>Percorso: ${state.province.map(p => p.n).join(' ➔ ')}</p>`;
+    }
+    
+    // Mostra distanza solo per carico completo con scarico multiplo
+    if (state.tipo === 'completo' && state.scarico !== 'singolo') {
         html += `<p>Distanza totale (+5%): <b>${kmMaggiorati.toFixed(0)} km</b></p>`;
     }
     
     if (state.tipo === 'parziale') {
-        const coeff = getCoeff(document.getElementById('metri').value);
-        const provRiferimento = (state.scarico === 'multiplo') 
-            ? state.province[state.province.length - 1] 
-            : state.province[0];
-        html += `<p>Lunghezza: <b>${state.metri} mt</b> (${(coeff * 100).toFixed(0)}% del completo)</p>`;
-        // Per commerciali mostra solo il prezzo più alto, per admin mostra entrambi
-        if (state.ruolo === 'amministratore') {
-            html += `<p>Prezzo completo riferimento: <b>€ ${provRiferimento.b.toFixed(2)}</b> / <b>€ ${provRiferimento.t.toFixed(2)}</b></p>`;
+        let dettaglioMc = '';
+        if (state.mc <= 2) {
+            dettaglioMc = `(${state.mc} mc × 150€)`;
+        } else if (state.mc <= 4) {
+            dettaglioMc = `(2 mc × 150€ + ${(state.mc - 2).toFixed(1)} mc × 100€)`;
         } else {
-            html += `<p>Prezzo completo riferimento: <b>€ ${Math.max(provRiferimento.b, provRiferimento.t).toFixed(2)}</b></p>`;
+            dettaglioMc = '(max 4 mc)';
         }
+        html += `<p>Ingombro: <b>${state.mc} mc</b> ${dettaglioMc}</p>`;
     }
     
     if (numScarichiExtra > 0) html += `<p>Scarichi extra: ${numScarichiExtra}</p>`;
